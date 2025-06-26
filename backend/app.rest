@@ -1,0 +1,79 @@
+### GET
+GET http://localhost:5000/card/
+
+### POST
+POST http://localhost:5000/card/
+Content-Type: application/json
+
+{
+    "name": "discover"
+}
+
+### UPDATE
+PUT http://localhost:5000/card/1
+Content-Type: application/json
+
+{
+    "name": "new discover"
+}
+
+### DELETE
+DELETE http://localhost:5000/card/1
+
+
+
+### GET Category
+GET http://localhost:5000/category/
+
+### POST Category
+POST http://localhost:5000/category/
+Content-Type: application/json
+
+{
+    "name": "grocery"
+}
+
+### UPDATE Cateogry
+PUT http://localhost:5000/category/1
+Content-Type: application/json
+
+{
+    "name": "new grocery"
+}
+
+### DELETE
+DELETE http://localhost:5000/category/1
+
+
+
+### GET Cashback
+GET http://localhost:5000/cashback/
+
+### POST Cashback
+POST http://localhost:5000/cashback/
+Content-Type: application/json
+
+{
+    "cardId": 1,
+    "catId": 1,
+    "percent": 5
+}
+
+### UPDATE Cashback
+PUT http://localhost:5000/cashback/1
+Content-Type: application/json
+
+{
+    "cardId": 1,
+    "catId": 1,
+    "percent": 2
+}
+
+### DELETE Cashback
+DELETE http://localhost:5000/cashback/1
+Content-Type: application/json
+
+{
+    "cardId": 1,
+    "catId": 1
+}
