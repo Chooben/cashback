@@ -1,0 +1,31 @@
+#root {
+    max-width: 1280px;
+    padding: 2rem;
+    text-align: center;
+}
+table {
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid white;
+    padding: 8px;
+}
+
+.card-name {
+    font-weight: bold;
+}
+
+td:last-child {
+    border: none;
+}
+
+button {
+    border-radius: 12px;
+    background-color: darkgray;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
