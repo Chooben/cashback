@@ -29,8 +29,8 @@ function App() {
     switch (modalType) {
       case 'addCard':
         return <AddCard addCard={addCard} categories={categories}/>;
-      case 'addCat':
-        return <AddCategory addCat={addCat} />;
+      case 'addCategory':
+        return <AddCategory addCat={addCat} categories={categories} />;
       case 'editCashback': 
         return <EditCashback cardName={cards.find(card  => card.id === editTarget.cardId).name} cardId={editTarget.cardId} cashback={editTarget.cashbackValues} cards={cards} categories={categories} updateCash={updateCash}/>;
       default:
@@ -135,6 +135,7 @@ function App() {
     setCategories(prev => [...prev, data]);
 
     console.log("added new category");
+    toggleModal();
     } catch (err) {
       console.error("Error: ", err);
     }
@@ -175,14 +176,14 @@ function App() {
   return (
     <div>
       <table>
-        <TableHead categories={categories} />
+        <TableHead categories={categories}/>
         <TableBody editCash={editCash} cards={cards} categories={categories} cashbacks={cashbackMatrix} isEditing={isEditing}/>
       </table>
       {isEditing ? (
-        <div>
-          <button onClick={toggleEditing}>save</button>
-          <AddCategory addCat={addCat} />
+        <div>  
+          <button onClick={() => {setModalType('addCategory'); toggleModal();}}>Add category</button>
           <button onClick={() => {setModalType('addCard'); toggleModal();}}>Add card</button>
+          <button onClick={toggleEditing}>save</button>
         </div>) : (
           <button onClick={toggleEditing}>edit</button>
       )}

@@ -18,7 +18,6 @@ db.exec(`
 
 db.exec(`
     CREATE TABLE cashback (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
         cardId INTEGER,
         catId INTEGER,
         percent DOUBLE,

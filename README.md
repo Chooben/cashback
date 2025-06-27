@@ -5,7 +5,6 @@
         cd backend 
         npm install
     Frontend:
-        cd ../frontend
         cd frontend
         npm install
 

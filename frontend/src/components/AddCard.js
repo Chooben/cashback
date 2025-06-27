@@ -20,7 +20,8 @@ export const AddCard = ({ addCard, categories }) => {
   }
 
     return (
-        <form onSubmit={handlesubmit}>
+        <div>
+<form onSubmit={handlesubmit}>
             <div>
                 <label>Name</label>
                 <input required type='text' value={cardName} placeholder="Card Name" 
@@ -41,5 +42,7 @@ export const AddCard = ({ addCard, categories }) => {
                 ))}
             <button type='submit'>add card</button>
         </form>
+        </div>
+        
     );
 }
