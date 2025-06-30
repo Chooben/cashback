@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-export const EditCashback = ({ cardId, cashback, categories, updateCash, cardName }) => {
+export const EditCashback = ({ cardId, cashback, categories, updateCash, cardName, cbMemo }) => {
     console.log("editcashback name:" ,cardName)
     const [values, setValues] = useState(cashback);
 

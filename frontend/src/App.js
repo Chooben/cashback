@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import './App.css';
-import { TableHead } from './components/TableHead';
+import { TableHead } from './components/TableHead/TableHead.js';
 import { TableBody } from './components/TableBody';
 import { AddCard } from './components/AddCard';
 import { AddCategory } from './components/AddCategory';
@@ -28,17 +28,17 @@ function App() {
   const modalContent = () => {
     switch (modalType) {
       case 'addCard':
-        return <AddCard addCard={addCard} categories={categories}/>;
+        return <AddCard addCard={addCard} categories={categories} toggleModal={toggleModal} />;
       case 'addCategory':
         return <AddCategory addCat={addCat} categories={categories} />;
       case 'editCashback': 
-        return <EditCashback cardName={cards.find(card  => card.id === editTarget.cardId).name} cardId={editTarget.cardId} cashback={editTarget.cashbackValues} cards={cards} categories={categories} updateCash={updateCash}/>;
+        return <EditCashback cardName={cards.find(card  => card.id === editTarget.cardId).name} cardId={editTarget.cardId} cashback={editTarget.cashbackValues} cards={cards} categories={categories} updateCash={updateCash} />;
       default:
         return null;
     }
   }
   
-  // Fetch api data from card, category, cashback api
+  // Store original data from card, category, cashback API
   useEffect(() => {
     Promise.all([
       fetch("card"),
@@ -51,7 +51,7 @@ function App() {
       .then(([dataCards, dataCats, dataCashs]) => {
         setCards(dataCards);
         setCategories(dataCats);
-        setCashbacks(dataCashs)
+        setCashbacks(dataCashs);
       });
   }, []);
 
@@ -172,12 +172,17 @@ function App() {
     toggleModal();
   }
 
-  console.log('current modal type', modalType);
+  async function saveCats (newCats) {
+    setCategories(newCats);
+    console.log("new categories:", categories);
+    toggleEditing();
+  }
+
   return (
     <div>
       <table>
-        <TableHead categories={categories}/>
-        <TableBody editCash={editCash} cards={cards} categories={categories} cashbacks={cashbackMatrix} isEditing={isEditing}/>
+        <TableHead categories={categories} isEditing={isEditing} saveCats={saveCats} setCategories={setCategories}/>
+        <TableBody editCash={editCash} cards={cards} categories={categories} cashbacks={cashbackMatrix} isEditing={isEditing} />
       </table>
       {isEditing ? (
         <div>  

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export const AddCard = ({ addCard, categories }) => {
+export const AddCard = ({ addCard, categories, toggleModal }) => {
     const [values, setValues] = useState([]);
     const [cardName, setCardName] = useState('');
 
@@ -41,6 +41,7 @@ export const AddCard = ({ addCard, categories }) => {
                     </div>
                 ))}
             <button type='submit'>add card</button>
+            <button onClick={toggleModal}>Cancel</button>
         </form>
         </div>
         
