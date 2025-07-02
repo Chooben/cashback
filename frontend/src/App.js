@@ -1,21 +1,18 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import './App.css';
-import { TableHead } from './components/TableHead/TableHead.js';
-import { TableBody } from './components/TableBody';
 import { AddCard } from './components/AddCard';
 import { AddCategory } from './components/AddCategory';
-import { EditCashback } from './components/EditCashback.js'
 import { Modal } from './components/Modal/Modal.js';
+import { TableWrapper } from './components/Table/TableWrapper.js';
 
 function App() {
 
-  //Usestate variables to store api data
+  // Usestate variables to store api data
   const [cards, setCards] = useState([]);
   const [categories, setCategories] = useState([]);
   const [cashbacks, setCashbacks] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState(null);
-  const [editTarget, setEditTarget] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
   function toggleModal () {
@@ -31,14 +28,12 @@ function App() {
         return <AddCard addCard={addCard} categories={categories} toggleModal={toggleModal} />;
       case 'addCategory':
         return <AddCategory addCat={addCat} categories={categories} />;
-      case 'editCashback': 
-        return <EditCashback cardName={cards.find(card  => card.id === editTarget.cardId).name} cardId={editTarget.cardId} cashback={editTarget.cashbackValues} cards={cards} categories={categories} updateCash={updateCash} />;
       default:
         return null;
     }
   }
   
-  // Store original data from card, category, cashback API
+  // Store initial data from card, category, cashback API on start
   useEffect(() => {
     Promise.all([
       fetch("card"),
@@ -56,7 +51,7 @@ function App() {
   }, []);
 
   // Memoized storage for cashback values per card
-  const cashbackMatrix = useMemo(() => {
+  /* const cashbackMatrix = useMemo(() => {
     console.log("Rebuilding cashback matrix");
 
     const matrix = {};
@@ -71,12 +66,34 @@ function App() {
       matrix[cardId][catId] = percent;
     });
     return matrix;
+  }, [cards, categories, cashbacks]); */
+
+  const cbMap = useMemo(() => {
+    const map = {};
+    cards.forEach(card => 
+      categories.forEach(cat => {
+        map[`${card.id}_${cat.id}`] = 0
+      })
+    );
+    cashbacks.forEach(({ cardId, catId, percent }) => 
+      map[`${cardId}_${catId}`] = percent
+    );
+    return map;
   }, [cards, categories, cashbacks]);
+
+  /* const convertCbMap = (flatCb) => {
+    const pairs = Object.entries(flatCb);
+    pairs.map(([key, value]) => {
+      const [cardId, catId] = key.split("_").map(Number);
+      const percent = parseFloat(value) ? parseFloat(value) : 0;
+      return { cardId, catId, percent }
+    })
+  } */
 
   // Post request to card api
   async function addCard (cardName, cashbackValues) {
     try {
-      const res = await fetch("http://localhost:5000/card/", {
+      const res = await fetch("card", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -90,25 +107,20 @@ function App() {
     setCards(prev => [...prev, newCard]);
     
     const values = Object.entries(cashbackValues);
-    console.log("add card values:" ,newCard.id, "and " ,values);
 
     for (const [catId, percent] of values) {
-      
-      await fetch("http://localhost:5000/cashback/", {
+      await fetch("cashback", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json'},
         body: JSON.stringify({ 
           cardId: parseInt(newCard.id), 
           catId: parseInt(catId), 
-          percent: parseFloat(percent) 
+          percent: parseFloat(percent),
         })
     })}
-
-    const resCashbacks = await fetch("http://localhost:5000/cashback/");
+    const resCashbacks = await fetch("cashback");
     const updatedCashbacks = await resCashbacks.json();
     setCashbacks(updatedCashbacks);
-
-    console.log("cashback matrix:",cashbackMatrix)
     toggleModal();    
     } catch (err) {
       console.error("Error: ", err)
@@ -116,16 +128,14 @@ function App() {
   }
   // Post request to category api
   async function addCat (newCat) {
-    const formatName = newCat.toLowerCase();
+    const formatName = newCat.toLowerCase().trim();
     if (categories.some(cat => cat.name.toLowerCase() === formatName))
         return;
       
     try {
       const res = await fetch("http://localhost:5000/category/", {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({name: newCat})
     });
 
@@ -141,16 +151,8 @@ function App() {
     }
   }
 
-  // Open edit cashback modal
-  function editCash (cardId) {
-    const cashbackValues = cashbackMatrix[cardId];
-    setEditTarget({ cardId, cashbackValues });
-    setModalType('editCashback');
-    toggleModal();
-  }
-
   // Update cashback values for a card
-  async function updateCash (cardId, updatedValues) {
+  /* async function updateCash (cardId, updatedValues) {
     const values = Object.entries(updatedValues).map(([catId, percent]) => ({
       cardId,
       catId: parseInt(catId),
@@ -170,28 +172,30 @@ function App() {
     )));
 
     toggleModal();
-  }
+  } */
 
-  async function saveCats (newCats) {
+  async function handleSave (newCards, newCats, newCbs) {
+    setCards(newCards);
     setCategories(newCats);
-    console.log("new categories:", categories);
+    const cbEntries = Object.entries(newCbs);
+    const revertCbMap = cbEntries.map(([key, value]) => {
+      const [cardId, catId] = key.split("_").map(Number);
+      const percent = parseFloat(value) || 0;
+      return { cardId, catId, percent }
+    })
+    setCashbacks(revertCbMap);
     toggleEditing();
   }
 
   return (
     <div>
-      <table>
-        <TableHead categories={categories} isEditing={isEditing} saveCats={saveCats} setCategories={setCategories}/>
-        <TableBody editCash={editCash} cards={cards} categories={categories} cashbacks={cashbackMatrix} isEditing={isEditing} />
-      </table>
+      <TableWrapper cards={cards} categories={categories} cbMap={cbMap} isEditing={isEditing} handleSave={handleSave} />
       {isEditing ? (
         <div>  
           <button onClick={() => {setModalType('addCategory'); toggleModal();}}>Add category</button>
           <button onClick={() => {setModalType('addCard'); toggleModal();}}>Add card</button>
-          <button onClick={toggleEditing}>save</button>
-        </div>) : (
-          <button onClick={toggleEditing}>edit</button>
-      )}
+        </div>
+      ) : <button onClick={toggleEditing}>edit</button>}
 
       {modalOpen && (
         <Modal onClose={() => setModalType(null)}>

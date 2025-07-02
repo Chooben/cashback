@@ -6,6 +6,8 @@ export const cashbackSchema = z.object({
     percent: z.number().min(0, 'Percent must exist'),
 });
 
+export const cashbackArraySchema = z.array(cashbackSchema);
+
 export const validateCashback = (req, res, next) => {
     try {
         req.validatedBody = cashbackSchema.parse(req.body);
