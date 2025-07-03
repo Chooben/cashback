@@ -1,6 +1,6 @@
 import express from 'express';
 import db from '../db.js';
-import { validateCard } from '../validators/cardValidator.js';
+import { validateCard, validateCardArray } from '../validators/cardValidator.js';
 
 const router = express.Router();
 
@@ -24,14 +24,22 @@ router.post('/', validateCard, (req, res) => {
     }
 });
 
-router.put('/:id', (req, res) => {
-    const  { name } = req.body;
-    const  { id } = req.params;
-
-    const updateCard = db.prepare('UPDATE card SET name = ? WHERE id = ?')
-    updateCard.run(name, id)
-
-    res.json({ message: "Card updated" })
+router.put('/', validateCardArray, (req, res) => {
+    const values = req.validatedBody;
+    try {
+        values.forEach(card => {
+            const [id, name] = [card.id, card.name];            
+            const updateCard = db.prepare(`
+                UPDATE card
+                SET name = ?
+                WHERE id = ?
+            `).run(name, id);
+        });
+        res.status(200).json({ message: "Cards updated" });
+    } catch (err) {
+        console.error("Error udpating card", err);
+        res.status(500).json({ error: "Failed to update cards" })
+    };
 })
 
 router.delete('/:id', (req, res) => {

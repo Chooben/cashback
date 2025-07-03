@@ -68,11 +68,12 @@ function App() {
     return matrix;
   }, [cards, categories, cashbacks]); */
 
+  // Memoized storage for cashbacks in flat array "{cardId}_{catId} = percent"
   const cbMap = useMemo(() => {
     const map = {};
     cards.forEach(card => 
       categories.forEach(cat => {
-        map[`${card.id}_${cat.id}`] = 0
+        map[`${card.id}_${cat.id}`] = 0;
       })
     );
     cashbacks.forEach(({ cardId, catId, percent }) => 
@@ -80,15 +81,6 @@ function App() {
     );
     return map;
   }, [cards, categories, cashbacks]);
-
-  /* const convertCbMap = (flatCb) => {
-    const pairs = Object.entries(flatCb);
-    pairs.map(([key, value]) => {
-      const [cardId, catId] = key.split("_").map(Number);
-      const percent = parseFloat(value) ? parseFloat(value) : 0;
-      return { cardId, catId, percent }
-    })
-  } */
 
   // Post request to card api
   async function addCard (cardName, cashbackValues) {
@@ -100,14 +92,11 @@ function App() {
       },
       body: JSON.stringify({name: cardName})
     });
-
     if (!res.ok) throw new Error("Failed to add card");
-
     const newCard = await res.json();
     setCards(prev => [...prev, newCard]);
     
     const values = Object.entries(cashbackValues);
-
     for (const [catId, percent] of values) {
       await fetch("cashback", {
         method: 'POST',
@@ -121,6 +110,7 @@ function App() {
     const resCashbacks = await fetch("cashback");
     const updatedCashbacks = await resCashbacks.json();
     setCashbacks(updatedCashbacks);
+
     toggleModal();    
     } catch (err) {
       console.error("Error: ", err)
@@ -133,18 +123,14 @@ function App() {
         return;
       
     try {
-      const res = await fetch("http://localhost:5000/category/", {
+      const res = await fetch("category", {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({name: newCat})
     });
-
     if (!res.ok) throw new Error("Failed to add category");
-
     const data = await res.json();
     setCategories(prev => [...prev, data]);
-
-    console.log("added new category");
     toggleModal();
     } catch (err) {
       console.error("Error: ", err);

@@ -1,6 +1,6 @@
 import express from 'express'
 import db from '../db.js'
-import { validateCashback } from '../validators/cashbackValidator.js';
+import { validateCashback, validateCashbackArray } from '../validators/cashbackValidator.js';
 
 const router = express.Router();
 
@@ -11,9 +11,8 @@ router.get('/', (req, res) => {
             FROM cashback
         `);
 
-        const cashback = query.all();
-
-        res.json(cashback);
+        const cashbacks = query.all();
+        res.json(cashbacks);
     } catch (error) {
         console.error("Error get request chashback", error);
     }
@@ -29,7 +28,6 @@ router.get('/:cardId', (req, res) => {
         `);
 
         const cashback = query.all(cardId);
-
         res.json(cashback);
     } catch (error) {
         console.error("Error in GET /cashback/:cardId", error);
@@ -39,39 +37,42 @@ router.get('/:cardId', (req, res) => {
 router.post('/', validateCashback, (req, res) => {
     const { cardId, catId, percent } = req.validatedBody;
     try {
-        
-        console.log("Cashback POST: ", {cardId, catId, percent})
-        const query = db.prepare(`INSERT INTO cashback (cardId, catId, percent) VALUES (?, ?, ?)`);
-
-        const result = query.run(cardId, catId, percent);
+        const query = db.prepare(
+            `INSERT INTO cashback (cardId, catId, percent) 
+            VALUES (?, ?, ?)`
+        ).run(cardId, catId, percent);
         res.status(201).json({ message: 'Cashback created' });
     } catch (error) {
         console.log("Error post request cashback", error);
     }    
 });
 
-router.put('/', validateCashback, async (req, res) => {
-    const { cardId, catId, percent } = req.validatedBody;
-
+router.put('/', validateCashbackArray, (req, res) => {
+    const values = req.validatedBody;
+    //const { cardId, catId, percent } = req.validatedBody;
     try {
-        const exists = db.prepare(`SELECT * FROM cashback WHERE cardId = ? and catId = ?`)
-        .get(cardId, catId);
+        values.forEach(cb => {
+            const [cardId, catId, percent] = [cb.cardId, cb.catId, cb.percent];
 
-        if (exists) {
-            const query = db.prepare(`
-                UPDATE cashback 
-                SET percent = ? 
-                WHERE cardId = ? AND catId = ?
-            `).run(percent, cardId, catId);
+            const exists = db.prepare(`
+                SELECT * FROM cashback 
+                WHERE cardId = ? and catId = ?
+            `).get(cardId, catId);
 
-            res.status(200).json({ message: 'Cashback updated' });
-            
-        } else {
-            const query = db.prepare(`
-                INSERT INTO cashback (cardId, catId, percent) VALUES (?, ?, ?)    
-            `).run(cardId, catId, percent);
-            res.status(201).json({ message: 'Cashback created in update' });
-        }
+            if (exists) {
+                const query = db.prepare(`
+                    UPDATE cashback 
+                    SET percent = ? 
+                    WHERE cardId = ? AND catId = ?
+                `).run(percent, cardId, catId);
+            } else {
+                const query = db.prepare(`
+                    INSERT INTO cashback (cardId, catId, percent) 
+                    VALUES (?, ?, ?)    
+                `).run(cardId, catId, percent);
+            }
+        }); 
+        res.status(200).json({ message: 'Cashback updated' });        
     } catch (error) {
         console.error('Error updating cashback:', error);
         res.sendStatus(500);
@@ -80,8 +81,7 @@ router.put('/', validateCashback, async (req, res) => {
 
 router.delete('/:id', (req, res) => {
     try {
-        const { cardId } = req.body;
-        const { catId } = req.body;
+        const { cardId, catId } = req.body;
 
         const query = db.prepare(`DELETE FROM cashback WHERE catId = ? AND cardId = ?`);
         query.run(catId, cardId);

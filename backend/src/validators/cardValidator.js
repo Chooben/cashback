@@ -1,8 +1,13 @@
 import { z } from 'zod';
 
-export const cardSchema = z.object({
+const cardSchema = z.object({
     name: z.string().min(1, "Name is required"),
 });
+const fullCardSchema = z.object({
+    id: z.number().int().min(1, "Card must have an id"),
+    name: z.string().min(1, "Name is required")
+})
+const cardArraySchema = z.array(fullCardSchema);
 
 export const validateCard = (req, res, next) => {
     try {
@@ -17,4 +22,19 @@ export const validateCard = (req, res, next) => {
             }))
         })
     }
-}
+};
+export const validateCardArray = (req, res, next) => {
+    try {
+        const data = cardArraySchema.parse(req.body);
+        req.validatedBody = data;        
+        next();
+    } catch (err) {
+        return res.status(400).json({
+            error: "Validation failed",
+            issues: err.errors.map(e => ({
+                path: e.path.join("."),
+                message: e.message,
+            }))
+        });
+    }
+};
