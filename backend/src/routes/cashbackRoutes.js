@@ -34,13 +34,16 @@ router.get('/:cardId', (req, res) => {
     }
 });
 
-router.post('/', validateCashback, (req, res) => {
-    const { cardId, catId, percent } = req.validatedBody;
+router.post('/', validateCashbackArray, (req, res) => {
+    const values = req.validatedBody;
     try {
-        const query = db.prepare(
-            `INSERT INTO cashback (cardId, catId, percent) 
-            VALUES (?, ?, ?)`
-        ).run(cardId, catId, percent);
+        values.forEach(cb => {
+            const [cardId, catId, percent] = [cb.cardId, cb.catId, cb.percent];
+            const query = db.prepare(`
+                INSERT INTO cashback (cardId, catId, percent) 
+                VALUES (?, ?, ?)
+            `).run(cardId, catId, percent);
+        });
         res.status(201).json({ message: 'Cashback created' });
     } catch (error) {
         console.log("Error post request cashback", error);
@@ -49,7 +52,6 @@ router.post('/', validateCashback, (req, res) => {
 
 router.put('/', validateCashbackArray, (req, res) => {
     const values = req.validatedBody;
-    //const { cardId, catId, percent } = req.validatedBody;
     try {
         values.forEach(cb => {
             const [cardId, catId, percent] = [cb.cardId, cb.catId, cb.percent];
