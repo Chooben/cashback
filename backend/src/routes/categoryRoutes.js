@@ -5,18 +5,17 @@ import { validateCategory, validateCategoryArray } from '../validators/categoryV
 const router = express.Router();
 
 router.get('/', (req, res) => {
-    const categories = db.prepare('SELECT * FROM category');
-    const cat = categories.all();
-
-    res.json(cat);
+    const query = db.prepare('SELECT * FROM category');
+    const categories = query.all();
+    res.json(categories);
 })
 
 router.post('/', validateCategory, (req, res) => {
-    const { name } = req.validatedBody;
-
     try {
-        const insertCat = db.prepare(`INSERT INTO category (name) VALUES (?)`);
-        const result = insertCat.run(name);
+        const { name } = req.validatedBody;
+        const query = db.prepare(`INSERT INTO category (name) VALUES (?)`);
+        const result = query.run(name);
+        console.log("cat post request",result)
         res.status(201).json({ id: result.lastInsertRowid, name });
     } catch (err) {
         res.status(500).json({ error: "Failed to insert category" })
@@ -24,17 +23,19 @@ router.post('/', validateCategory, (req, res) => {
 });
 
 router.put('/', validateCategoryArray, (req, res) => {
-    const values = req.validatedBody;
     try {
+        const values = req.validatedBody;
+        const updatedCats = [];
         values.forEach(cat => {
             const [id, name] = [parseInt(cat.id), cat.name];
             const updateCat = db.prepare(`
                 UPDATE category
                 SET name =?
                 WHERE id = ?
-            `).run(name, id);            
+            `).run(name, id);
+            updatedCats.push({ id, name });
         });
-        res.status(200).json({ message: "category updated" });
+        res.status(200).json(updatedCats);
     } catch (err) {
         console.error("Error updating categories", err);
         res.status(500).json({ error: "Failed to update categories" })

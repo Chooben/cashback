@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export const TableWrapper = ({ cards, categories, cbMap, isEditing, handleSave }) => {
     const [editingState, setEditingState] = useState();
@@ -6,6 +6,10 @@ export const TableWrapper = ({ cards, categories, cbMap, isEditing, handleSave }
     const [editCards, setEditCards] = useState([]);
     const [editCats, setEditCats] = useState([]);
     const [editCbs, setEditCbs] = useState({});
+
+    const updatedCards = useRef({});
+    const updatedCats = useRef({});
+    const updatedCbs = useRef({});
 
     useEffect(() => {
         setEditCards(cards);
@@ -26,17 +30,23 @@ export const TableWrapper = ({ cards, categories, cbMap, isEditing, handleSave }
                 prev.map(card => card.id === cardId ?
                     {...card, name: value} : card
             ));
+            updatedCards.current[cardId] = value;
+            console.log("updated cards", updatedCards.current);
         } else if (type === "cat") {
             setEditCats(prev => 
                 prev.map(cat => cat.id === catId ?
                     {...cat, name: value} : cat
             ));
+            updatedCats.current[catId] = value;
+            console.log("udpated cats", updatedCats.current)
         } else if (type === "cb") {
             const cb = getCb(cardId, catId);
             setEditCbs(prev => ({
                 ...prev, 
                 [cb.key]: parseFloat(value) || 0
             }));
+            updatedCbs.current[cb.key] = parseFloat(value) || 0;
+            console.log("updated cbs", updatedCbs.current);
         } else {
             console.log("Invalid handle change type");
         }
@@ -44,7 +54,11 @@ export const TableWrapper = ({ cards, categories, cbMap, isEditing, handleSave }
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        handleSave(editCards, editCats, editCbs);
+        handleSave(updatedCards.current, updatedCats.current, updatedCbs.current);
+        console.log(updatedCards.current)
+        updatedCards.current = {};
+        updatedCats.current = {};
+        updatedCbs.current = {};
     }
 
     return (

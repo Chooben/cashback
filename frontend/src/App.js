@@ -1,5 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
 import './App.css';
+import { useEffect, useMemo, useState } from 'react';
+import { cardService } from './services/cardService.js';
+import { categoryService } from './services/categoryService.js';
+import { cashbackService } from './services/cashbackService.js';
 import { AddCard } from './components/AddCard';
 import { AddCategory } from './components/AddCategory';
 import { Modal } from './components/Modal/Modal.js';
@@ -24,49 +27,33 @@ function App() {
   }
   const modalContent = () => {
     switch (modalType) {
-      case 'addCard':
-        return <AddCard addCard={addCard} categories={categories} toggleModal={toggleModal} />;
+      case 'addCard': {
+        if (categories.length === 0) 
+          toggleModal();
+        else
+          return <AddCard addCard={addCard} categories={categories} toggleModal={toggleModal} />;
+        
+         break;
+      };
       case 'addCategory':
         return <AddCategory addCat={addCat} categories={categories} />;
       default:
         return null;
     }
   }
-  
+
   // Store initial data from card, category, cashback API on start
   useEffect(() => {
     Promise.all([
-      fetch("card"),
-      fetch("category"),
-      fetch("cashback")
-    ])
-      .then(([resCards, resCats, resCashs]) => 
-        Promise.all([resCards.json(), resCats.json(), resCashs.json()])
-      )
-      .then(([dataCards, dataCats, dataCashs]) => {
-        setCards(dataCards);
-        setCategories(dataCats);
-        setCashbacks(dataCashs);
-      });
+      cardService.getCards(),
+      categoryService.getCategory(),
+      cashbackService.getCashback(),
+    ]).then(([cardsRes, categoriesRes, cashbacksRes]) => {
+      setCards(cardsRes);
+      setCategories(categoriesRes);
+      setCashbacks(cashbacksRes);
+    })
   }, []);
-
-  // Memoized storage for cashback values per card
-  /* const cashbackMatrix = useMemo(() => {
-    console.log("Rebuilding cashback matrix");
-
-    const matrix = {};
-    cards.forEach(card => {
-      matrix[card.id] = {};
-      categories.forEach(cat => {
-        matrix[card.id][cat.id] = 0;
-      });
-    });
-    cashbacks.forEach(({ cardId, catId, percent }) => {
-      if (!matrix[cardId]) matrix[cardId] = {};
-      matrix[cardId][catId] = percent;
-    });
-    return matrix;
-  }, [cards, categories, cashbacks]); */
 
   // Memoized storage for cashbacks in flat array "{cardId}_{catId} = percent"
   const cbMap = useMemo(() => {
@@ -76,6 +63,7 @@ function App() {
         map[`${card.id}_${cat.id}`] = 0;
       })
     );
+
     cashbacks.forEach(({ cardId, catId, percent }) => 
       map[`${cardId}_${catId}`] = percent
     );
@@ -83,106 +71,92 @@ function App() {
   }, [cards, categories, cashbacks]);
 
   // Post request to card api
-  async function addCard (cardName, cashbackValues) {
+  async function addCard (cardName, cashbackValues) {     
     try {
-      const res = await fetch("card", {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({name: cardName})
-    });
-    if (!res.ok) throw new Error("Failed to add card");
-    const newCard = await res.json();
-    setCards(prev => [...prev, newCard]);
-    
-    const values = Object.entries(cashbackValues);
-    for (const [catId, percent] of values) {
-      await fetch("cashback", {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json'},
-        body: JSON.stringify({ 
-          cardId: parseInt(newCard.id), 
-          catId: parseInt(catId), 
-          percent: parseFloat(percent),
-        })
-    })}
-    const resCashbacks = await fetch("cashback");
-    const updatedCashbacks = await resCashbacks.json();
-    setCashbacks(updatedCashbacks);
-
-    toggleModal();    
-    } catch (err) {
-      console.error("Error: ", err)
-    }
-  }
-  // Post request to category api
-  async function addCat (newCat) {
-    const formatName = newCat.toLowerCase().trim();
-    if (categories.some(cat => cat.name.toLowerCase() === formatName))
-        return;
+      const newCard = await cardService.createCard({name: cardName});
+      setCards(prev => [...prev, newCard]);
       
-    try {
-      const res = await fetch("category", {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({name: newCat})
-    });
-    if (!res.ok) throw new Error("Failed to add category");
-    const data = await res.json();
-    setCategories(prev => [...prev, data]);
-    toggleModal();
+      const values = Object.entries(cashbackValues).map(([catId, percent]) => ({
+        cardId: parseInt(newCard.id),
+        catId: parseInt(catId),
+        percent: parseFloat(percent),
+      }));
+      const resCashback = await cashbackService.createCashback(values);
+      setCashbacks(prev => [...prev, ...resCashback]);
+
+      toggleModal();    
     } catch (err) {
       console.error("Error: ", err);
     }
   }
 
-  // Update cashback values for a card
-  /* async function updateCash (cardId, updatedValues) {
-    const values = Object.entries(updatedValues).map(([catId, percent]) => ({
-      cardId,
-      catId: parseInt(catId),
-      percent: parseFloat(percent)
-    }));
-
-    console.log("parsed values:", values)
-
-    setCashbacks(prev => [...prev.filter(cb => cb.id !== cardId), ...values]);
-
-    await Promise.all(values.map(cb => 
-      fetch("http://localhost:5000/cashback/", {
-      method: 'PUT',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(cb)
+  // Post request to category api
+  async function addCat (newCat) {
+    newCat.trim();
+    const formatName = newCat.toLowerCase();
+    if (categories.some(cat => cat.name.toLowerCase() === formatName))
+        return;
+      
+    try {
+      const res = await categoryService.createCategory({ name: newCat });
+      setCategories(prev => [...prev, res]);
+      toggleModal();
+    } catch (err) {
+      console.error("Error: ", err);
     }
-    )));
+  }
 
-    toggleModal();
-  } */
-
+  // Handle save all edits to table
   async function handleSave (newCards, newCats, newCbs) {
-    setCards(newCards);
-    setCategories(newCats);
-    const cbEntries = Object.entries(newCbs);
-    const revertCbMap = cbEntries.map(([key, value]) => {
-      const [cardId, catId] = key.split("_").map(Number);
-      const percent = parseFloat(value) || 0;
-      return { cardId, catId, percent }
-    })
-    setCashbacks(revertCbMap);
+    const formatCards = Object.entries(newCards).map(([id, name]) => ({ id: parseInt(id), name }));
+ 
+    setCards(prev => 
+      prev.map(card => 
+        newCards[card.id] ? {...card, name: newCards[card.id]} : card
+      )
+    );
+    setCategories(prev =>
+      prev.map(cat => 
+        newCats[cat.id] ? {...cat, name: newCats[cat.id]} : cat
+      )
+    );
+    setCashbacks(prev =>
+      prev.map(cb => {
+        const key = `${cb.cardId}_${cb.catId}`;
+        return newCbs[key] !== undefined ? {...cb, percent: newCbs[key]} : cb
+      })
+    )
+
+    Promise.all([
+      cardService.updateCards(formatCards),
+      categoryService.udpateCategory(
+        Object.entries(newCats).map(([id, name]) => ({ id: parseInt(id), name }))
+      ),
+      cashbackService.updateCashback(
+        Object.entries(newCbs).map((([key, value]) => {
+          const [cardId, catId] = key.split('_').map(Number);
+          return { cardId, catId, percent: parseFloat(value) }
+        }))
+      ),
+    ]);
     toggleEditing();
   }
+  
+  // Console log current cards, categories, cashbacks
+  useEffect(() =>  {
+    console.log("cards", cards);
+    console.log("categories", categories);
+    console.log("cashbacks", cashbacks);
+  }, [cards, categories, cashbacks]);
 
   return (
     <div>
       <TableWrapper cards={cards} categories={categories} cbMap={cbMap} isEditing={isEditing} handleSave={handleSave} />
-      {isEditing ? (
         <div>  
           <button onClick={() => {setModalType('addCategory'); toggleModal();}}>Add category</button>
           <button onClick={() => {setModalType('addCard'); toggleModal();}}>Add card</button>
+          <button onClick={toggleEditing}>edit</button>
         </div>
-      ) : <button onClick={toggleEditing}>edit</button>}
-
       {modalOpen && (
         <Modal onClose={() => setModalType(null)}>
           {modalContent()}

@@ -1,6 +1,9 @@
 import { useState } from "react";
 
 export const AddCard = ({ addCard, categories, toggleModal }) => {
+    if (categories.length == 0) {
+        toggleModal();
+    }
     const [values, setValues] = useState(() => 
         categories.reduce((acc, cat) => {
             acc[cat.id] = 0;

@@ -5,19 +5,19 @@ import { validateCard, validateCardArray } from '../validators/cardValidator.js'
 const router = express.Router();
 
 router.get('/', (req, res) => {
-    const getCards = db.prepare(`SELECT * FROM card`);
-    const cards = getCards.all();
+    const query = db.prepare(`SELECT * FROM card`);
+    const cards = query.all();
 
     res.json(cards);
 })
 
 router.post('/', validateCard, (req, res) => {
-    const { name } = req.validatedBody;
-        
     try {
-        const insertCard = db.prepare(`INSERT INTO card (name) VALUES (?)`);
-        const result = insertCard.run(name);
-        res.status(201).json({ id: result.lastInsertRowid, name });
+        const { name } = req.validatedBody;
+        const query = db.prepare(`
+            INSERT INTO card (name) VALUES (?)
+        `).run(name);
+        res.status(201).json({ id: query.lastInsertRowid, name });
     } catch (err) {
         console.error("Error inserting card:", err);
         res.status(500).json({ error: "Failed to insert card" })
@@ -25,17 +25,19 @@ router.post('/', validateCard, (req, res) => {
 });
 
 router.put('/', validateCardArray, (req, res) => {
-    const values = req.validatedBody;
     try {
+        const values = req.validatedBody;
+        const updatedCards = [];
         values.forEach(card => {
             const [id, name] = [card.id, card.name];            
-            const updateCard = db.prepare(`
+            const query = db.prepare(`
                 UPDATE card
                 SET name = ?
                 WHERE id = ?
             `).run(name, id);
+            updatedCards.push({ id, name });
         });
-        res.status(200).json({ message: "Cards updated" });
+        res.status(200).json(updatedCards);
     } catch (err) {
         console.error("Error udpating card", err);
         res.status(500).json({ error: "Failed to update cards" })
