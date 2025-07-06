@@ -31,14 +31,12 @@ export const TableWrapper = ({ cards, categories, cbMap, isEditing, handleSave }
                     {...card, name: value} : card
             ));
             updatedCards.current[cardId] = value;
-            console.log("updated cards", updatedCards.current);
         } else if (type === "cat") {
             setEditCats(prev => 
                 prev.map(cat => cat.id === catId ?
                     {...cat, name: value} : cat
             ));
             updatedCats.current[catId] = value;
-            console.log("udpated cats", updatedCats.current)
         } else if (type === "cb") {
             const cb = getCb(cardId, catId);
             setEditCbs(prev => ({
@@ -46,7 +44,6 @@ export const TableWrapper = ({ cards, categories, cbMap, isEditing, handleSave }
                 [cb.key]: parseFloat(value) || 0
             }));
             updatedCbs.current[cb.key] = parseFloat(value) || 0;
-            console.log("updated cbs", updatedCbs.current);
         } else {
             console.log("Invalid handle change type");
         }
@@ -115,7 +112,7 @@ export const TableWrapper = ({ cards, categories, cbMap, isEditing, handleSave }
             {isEditing && (
                 <div>
                     <button onClick={handleSubmit}>Save</button>
-                    <button>Cancel</button>
+                    <button onClick={() => handleSave({}, {}, {})}>Cancel</button>
                 </div>
             )}
         </div>

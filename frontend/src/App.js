@@ -152,11 +152,14 @@ function App() {
   return (
     <div>
       <TableWrapper cards={cards} categories={categories} cbMap={cbMap} isEditing={isEditing} handleSave={handleSave} />
-        <div>  
+      {!isEditing &&
+        <div> 
           <button onClick={() => {setModalType('addCategory'); toggleModal();}}>Add category</button>
           <button onClick={() => {setModalType('addCard'); toggleModal();}}>Add card</button>
           <button onClick={toggleEditing}>edit</button>
         </div>
+      }
+        
       {modalOpen && (
         <Modal onClose={() => setModalType(null)}>
           {modalContent()}
