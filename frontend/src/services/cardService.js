@@ -36,10 +36,22 @@ async function updateCards (cardValues) {
         console.error("Failed to UPDATE /card", err);
         return [];
     }
-}
+};
+async function deleteCard (cardId) {
+    try {
+        const result = await api.delete(`/${cardId}`);
+        console.log(`Deleting: ${api.defaults.baseURL}/${cardId}`);
+
+        return result.data || {};
+    } catch (err) {
+        console.error("Failed to DELETE /card", err);
+        return {};
+    }
+};
 
 export const cardService = {
     getCards,
     createCard,
     updateCards,
+    deleteCard,
 }

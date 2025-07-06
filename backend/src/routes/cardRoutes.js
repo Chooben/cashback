@@ -1,6 +1,6 @@
 import express from 'express';
 import db from '../db.js';
-import { validateCard, validateCardArray } from '../validators/cardValidator.js';
+import { validateCard, validateCardArray, validateParams } from '../validators/cardValidator.js';
 
 const router = express.Router();
 
@@ -9,7 +9,7 @@ router.get('/', (req, res) => {
     const cards = query.all();
 
     res.json(cards);
-})
+});
 
 router.post('/', validateCard, (req, res) => {
     try {
@@ -42,15 +42,19 @@ router.put('/', validateCardArray, (req, res) => {
         console.error("Error udpating card", err);
         res.status(500).json({ error: "Failed to update cards" })
     };
-})
+});
 
-router.delete('/:id', (req, res) => {
-    const { id } = req.params;
-
-    const deleteCard = db.prepare('DELETE FROM card WHERE id = ?')
-    deleteCard.run(id)
-
-    res.json({ message: "Card deleted" })
-})
+router.delete('/:id', validateParams, (req, res) => {
+    try {
+        const { id } = req.validatedParams;
+        const deleteCard = db.prepare(`
+            DELETE FROM card WHERE id = ?
+        `).run(parseInt(id));
+        res.status(200).json({ message: "Card successfully delete", id});
+    } catch (err) {
+        console.error("Error deleting card", err);
+        res.status(500).json({ error: "Failed to delete card" });
+    };
+});
 
 export default router;

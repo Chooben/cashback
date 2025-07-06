@@ -21,8 +21,8 @@ db.exec(`
         cardId INTEGER,
         catId INTEGER,
         percent DOUBLE,
-        FOREIGN KEY(cardId) REFERENCES card(id),
-        FOREIGN KEY(catId) REFERENCES category(id)
+        FOREIGN KEY(cardId) REFERENCES card(id) ON DELETE CASCADE,
+        FOREIGN KEY(catId) REFERENCES category(id) ON DELETE CASCADE
     )
 `)
 

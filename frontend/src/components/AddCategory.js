@@ -15,7 +15,6 @@ export const AddCategory = ({ addCat, categories, toggleModal }) => {
                     <button type='submit'>add category</button>  
                     <button onClick={toggleModal}>Cancel</button>         
             </form>
-            
             <ul>
                 {categories.map((cat) => (
                     <li key={cat.id}>{cat.name}</li>

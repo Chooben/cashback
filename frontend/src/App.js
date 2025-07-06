@@ -7,6 +7,7 @@ import { AddCard } from './components/AddCard';
 import { AddCategory } from './components/AddCategory';
 import { Modal } from './components/Modal/Modal.js';
 import { TableWrapper } from './components/Table/TableWrapper.js';
+import { DeleteCard } from './components/DeleteCard.js';
 
 function App() {
 
@@ -27,18 +28,22 @@ function App() {
   }
   const modalContent = () => {
     switch (modalType) {
-      case 'addCard': {
-        if (categories.length === 0) 
+      case 'addCard':
+        if (categories.length === 0)
           toggleModal();
-        else
-          return <AddCard addCard={addCard} categories={categories} toggleModal={toggleModal} />;
-        
-         break;
-      };
+
+        return <AddCard addCard={addCard} categories={categories} toggleModal={toggleModal} />;
+
       case 'addCategory':
         return <AddCategory addCat={addCat} categories={categories} />;
+        
+      case 'deleteCard':
+        if (cards.length === 0)
+          toggleModal();
+        return <DeleteCard cards={cards} deleteCard={deleteCard} />
       default:
         return null;
+      
     }
   }
 
@@ -106,6 +111,12 @@ function App() {
     }
   }
 
+  // Delete card, cascade deletes all cashbacks for card automatically
+  const deleteCard = (id) => {
+        cardService.deleteCard(id);
+        setCards(prev => prev.filter(card => card.id !== id))
+        toggleModal();
+    }
   // Handle save all edits to table
   async function handleSave (newCards, newCats, newCbs) {
     const formatCards = Object.entries(newCards).map(([id, name]) => ({ id: parseInt(id), name }));
@@ -157,6 +168,7 @@ function App() {
           <button onClick={() => {setModalType('addCategory'); toggleModal();}}>Add category</button>
           <button onClick={() => {setModalType('addCard'); toggleModal();}}>Add card</button>
           <button onClick={toggleEditing}>edit</button>
+          <button onClick={() => {setModalType('deleteCard'); toggleModal();}}>Delete card</button>
         </div>
       }
         

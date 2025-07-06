@@ -1,16 +1,13 @@
 import { useState } from "react";
 
 export const AddCard = ({ addCard, categories, toggleModal }) => {
-    if (categories.length == 0) {
-        toggleModal();
-    }
+    const [cardName, setCardName] = useState('');
     const [values, setValues] = useState(() => 
         categories.reduce((acc, cat) => {
             acc[cat.id] = 0;
             return acc;
         }, {})
     );
-    const [cardName, setCardName] = useState('');
 
     const handleChange = (e) => {
         const value = e.target.value !== "" ? e.target.value : 0
@@ -21,12 +18,11 @@ export const AddCard = ({ addCard, categories, toggleModal }) => {
     }
 
     const handlesubmit = async (e) => {
-    e.preventDefault();
-    await addCard(cardName, values);
-    console.log("added card values", values);
-    setCardName('');
-    setValues([]);
-  }
+        e.preventDefault();
+        await addCard(cardName, values);
+        setCardName('');
+        setValues({});
+    }
 
     return (
         <div>
