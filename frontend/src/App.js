@@ -1,5 +1,5 @@
 import './App.css';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AddCard } from './components/AddCard';
 import { AddCategory } from './components/AddCategory';
 import { Modal } from './components/Modal/Modal.js';
@@ -40,11 +40,11 @@ function App() {
 
   function toggleModal () {
     setModalOpen(!modalOpen);
-  }
+  };
   const toggleEditing= () => {
     setIsEditing(!isEditing);
     setModalType(null);
-  }
+  };
   const modalContent = () => {
     switch (modalType) {
       case 'addCard':

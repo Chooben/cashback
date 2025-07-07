@@ -1,5 +1,7 @@
 # Cashback
 
+# Node Version: 24.2.0
+
 ## Install Dependencies:
     Backend:
         cd backend 
