@@ -31,10 +31,10 @@ async function createCard (name) {
 async function updateCards (cardValues) {
     try {
         const result = await api.put('', cardValues);
-        return result.data || [];
+        return { data: result.data, status: result.status };
     } catch (err) {
         console.error("Failed to UPDATE /card", err);
-        return [];
+        return { data: [], status: err.status || 500 };
     }
 };
 async function deleteCard (id) {

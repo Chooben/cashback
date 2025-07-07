@@ -31,10 +31,10 @@ async function addCategory (name) {
 async function udpateCategory (catValues) {
     try {
         const result = await api.put('', catValues);
-        return result.data || [];
+        return { data: result.data || [], status: 200 };
     } catch (err) {
-        console.log("Failed to PUT /category", err);
-        return [];
+        console.error("Failed to PUT /category", err);
+        return { data: [], status: err.status || 500 };
     }
 };
 async function deleteCategory (id) {

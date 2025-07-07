@@ -18,7 +18,8 @@ export const useCategories = () => {
         setCategories(prev => [...prev, res]);
         return res;
     };
-    const udpateCategory = (updatedCats) => {
+    const udpateCategory = async (updatedCats) => {
+        const rollback = categories;
         setCategories(prev => 
             prev.map(cat => 
                 updatedCats[cat.id] ? {...cat, name: updatedCats[cat.id]} : cat
@@ -26,7 +27,10 @@ export const useCategories = () => {
         );
         const formatCats = Object.entries(updatedCats)
             .map(([id, name]) => ({ id: parseInt(id), name }));
-        categoryService.udpateCategory(formatCats);
+        const result = await categoryService.udpateCategory(formatCats);
+        if (result.status !== 200) {
+            setCategories(rollback);
+        }
     };
     const deleteCategory = (id) => {
         setCategories(prev => prev.filter(cat => cat.id !== id));

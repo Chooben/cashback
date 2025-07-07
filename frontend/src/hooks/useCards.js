@@ -16,7 +16,9 @@ export const useCards = () => {
         );
         return res;
     };
-    const updateCard = (updatedCards) => {
+    const updateCard = async (updatedCards) => {
+        const rollback = cards;
+
         setCards(prev => 
             prev.map(card => 
                 updatedCards[card.id] ? {...card, name: updatedCards[card.id]} : card
@@ -25,7 +27,11 @@ export const useCards = () => {
         const formatCards = Object.entries(updatedCards).map(
             ([id, name]) => ({ id: parseInt(id), name })
         );
-        cardService.updateCards(formatCards);
+        const result = await cardService.updateCards(formatCards);
+        console.log("update status", result.status, "rollback", rollback)
+        if (result.status !== 200) {
+            setCards(rollback);
+        }
     };
     const deleteCard = (id) => {
         setCards(prev => prev.filter(card => card.id !== id));

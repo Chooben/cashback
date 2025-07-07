@@ -7,7 +7,6 @@ export const useCashbacks = ({ cards, categories }) => {
     useEffect(() => {
         cashbackService.getCashback()
             .then(res => setCashbacks(res));
-        console.log(cashbackService.getCashback())
     }, []);
 
     const cbMap = useMemo(() => {
@@ -44,7 +43,7 @@ export const useCashbacks = ({ cards, categories }) => {
         console.log("udpate cashbacks input", updatedCashbacks);
         setCashbacks(prev => 
             prev.map(cb => 
-                updatedCashbacks[`${cb.cardId}_${cb.catId}`] != undefined ? 
+                updatedCashbacks[`${cb.cardId}_${cb.catId}`] !== undefined ? 
                     {
                         ...cb, 
                         percent: parseFloat(updatedCashbacks[`${cb.cardId}_${cb.catId}`])
