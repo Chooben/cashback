@@ -12,21 +12,11 @@ export const useCashbacks = ({ cards, categories }) => {
 
     const cbMap = useMemo(() => {
         const map = {};
-        console.log("in cbmap: cards:", cards, "categories:", categories);
-        if (!cards || !categories)  return map;
-        
-        cards.forEach(card =>
-            categories.forEach(cat =>
-                map[`${card.id}_${cat.id}`] = 0
-            )
-        );
-
         cashbacks.forEach(cb => 
             map[`${cb.cardId}_${cb.catId}`] = cb.percent || 0
         );
-
         return map;
-    }, [cards, categories, cashbacks]);
+    }, [cashbacks]);
 
     const addCashbacks = async (cardId, catId, newCashbacks) => {
         const newCbs = [];
@@ -54,7 +44,7 @@ export const useCashbacks = ({ cards, categories }) => {
         console.log("udpate cashbacks input", updatedCashbacks);
         setCashbacks(prev => 
             prev.map(cb => 
-                updatedCashbacks[`${cb.cardId}_${cb.catId}`] ? 
+                updatedCashbacks[`${cb.cardId}_${cb.catId}`] != undefined ? 
                     {
                         ...cb, 
                         percent: parseFloat(updatedCashbacks[`${cb.cardId}_${cb.catId}`])

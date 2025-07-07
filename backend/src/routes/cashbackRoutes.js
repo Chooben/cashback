@@ -63,7 +63,6 @@ router.put('/', validateCashbackArray, (req, res) => {
                 SELECT * FROM cashback 
                 WHERE cardId = ? AND catId = ?
             `).get(cardId, catId);
-            console.log("does cb exist currently", exists)
             if (exists) {
                 const query = db.prepare(`
                     UPDATE cashback 
@@ -78,7 +77,6 @@ router.put('/', validateCashbackArray, (req, res) => {
             }
             updatedCbs.push({ cardId, catId, percent });
         }); 
-        console.log(updatedCbs);
         res.status(200).json(updatedCbs);        
     } catch (error) {
         console.error('Error updating cashback:', error);

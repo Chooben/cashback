@@ -14,7 +14,7 @@ export const useCards = () => {
         setCards(prev => 
             [...prev, res]
         );
-        return res.id;
+        return res;
     };
     const updateCard = (updatedCards) => {
         setCards(prev => 

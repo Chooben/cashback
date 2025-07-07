@@ -11,9 +11,10 @@
         npm install
 
 ## Run app:
-    backend:
-        cd backend
-        npm run dev
     Frontend:
         cd frontend
         npm start
+    Backend:
+        cd backend
+        npm run dev
+    

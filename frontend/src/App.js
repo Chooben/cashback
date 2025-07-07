@@ -13,9 +13,6 @@ import { DeleteCategory } from './components/DeleteCategory.js';
 function App() {
 
   // Usestate variables to store api data
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalType, setModalType] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
   const { 
     cards, 
     setCards, 
@@ -37,6 +34,10 @@ function App() {
     addCashbacks, 
     updateCashbacks 
   } = useCashbacks({cards, categories});
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  
 
   function toggleModal () {
     setModalOpen(!modalOpen);

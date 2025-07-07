@@ -32,7 +32,7 @@ async function createCashback (newCashback) {
 async function updateCashback (cashbackValues) {
     try {
         result =await api.put('', cashbackValues);
-        return result.data
+        return result.data || [];
     } catch (err) {
         console.error("", err);
         return [];
