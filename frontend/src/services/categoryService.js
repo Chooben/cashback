@@ -18,9 +18,9 @@ async function getCategory () {
     }
 };
 
-async function createCategory (catName) {
+async function addCategory (name) {
     try {
-        const result = await api.post('', catName);
+        const result = await api.post('', { name });
         return result.data || {};
     } catch (err) {
         console.err("Failed to POST /category", err);
@@ -37,9 +37,17 @@ async function udpateCategory (catValues) {
         return [];
     }
 };
+async function deleteCategory (id) {
+    try {
+        const result = await api.delete(`/${id}`);
+    } catch (err) {
+        console.error("Failed to delete /category", err);
+    }
+}
 
 export const categoryService = {
     getCategory,
-    createCategory,
+    addCategory,
     udpateCategory,
+    deleteCategory,
 }

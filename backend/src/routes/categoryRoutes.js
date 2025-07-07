@@ -15,7 +15,6 @@ router.post('/', validateCategory, (req, res) => {
         const { name } = req.validatedBody;
         const query = db.prepare(`INSERT INTO category (name) VALUES (?)`);
         const result = query.run(name);
-        console.log("cat post request",result)
         res.status(201).json({ id: result.lastInsertRowid, name });
     } catch (err) {
         res.status(500).json({ error: "Failed to insert category" })

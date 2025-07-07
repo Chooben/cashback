@@ -7,13 +7,14 @@ export const AddCategory = ({ addCat, categories, toggleModal }) => {
         e.preventDefault();
         await addCat(category);
         setCategory('');
+        toggleModal();
     }
     return (
         <div>
             <form onSubmit={handleCat}>
                     <input required type='text' value={category} onChange={(e) => setCategory(e.target.value)} />
                     <button type='submit'>add category</button>  
-                    <button onClick={toggleModal}>Cancel</button>         
+                    <button onClick={() => toggleModal()}>Cancel</button>         
             </form>
             <ul>
                 {categories.map((cat) => (

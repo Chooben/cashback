@@ -1,8 +1,8 @@
 import { useState } from "react";
 
-export const AddCard = ({ addCard, categories, toggleModal }) => {
+export const AddCard = ({ addCard, categories, addCashbacks, toggleModal }) => {
     const [cardName, setCardName] = useState('');
-    const [values, setValues] = useState(() => 
+    const [cbValues, setValues] = useState(() => 
         categories.reduce((acc, cat) => {
             acc[cat.id] = 0;
             return acc;
@@ -19,9 +19,11 @@ export const AddCard = ({ addCard, categories, toggleModal }) => {
 
     const handlesubmit = async (e) => {
         e.preventDefault();
-        await addCard(cardName, values);
+        const newCardId = await addCard(cardName);
+        await addCashbacks(newCardId, cbValues);
         setCardName('');
         setValues({});
+        toggleModal();
     }
 
     return (
@@ -39,7 +41,7 @@ export const AddCard = ({ addCard, categories, toggleModal }) => {
                                 name={cat.id}
                                 type="number"
                                 placeholder="%"
-                                value={values[cat.id] || ""}
+                                value={cbValues[cat.id] || ""}
                                 min={0} max={9}
                                 onChange={handleChange}
                             />

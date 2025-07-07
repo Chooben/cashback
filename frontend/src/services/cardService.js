@@ -18,9 +18,9 @@ async function getCards () {
     }
 };
 
-async function createCard (cardName) {
+async function createCard (name) {
     try {
-        const result = await api.post('', cardName);
+        const result = await api.post('', { name });
         return result.data || {};
     } catch (err) {
         console.error("Could not POST /card", err);
@@ -37,10 +37,10 @@ async function updateCards (cardValues) {
         return [];
     }
 };
-async function deleteCard (cardId) {
+async function deleteCard (id) {
     try {
-        const result = await api.delete(`/${cardId}`);
-        console.log(`Deleting: ${api.defaults.baseURL}/${cardId}`);
+        const result = await api.delete(`/${id}`);
+        console.log(`Deleting: ${api.defaults.baseURL}/${id}`);
 
         return result.data || {};
     } catch (err) {
