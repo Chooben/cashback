@@ -58,7 +58,7 @@ function App() {
 
       case 'addCategory':
         return <AddCategory 
-          addCat={addCategory} categories={categories} toggleModal={toggleModal} 
+          addCat={addCategory} categories={categories} addCashbacks={addCashbacks} toggleModal={toggleModal} 
         />;
         
       case 'deleteCard':
@@ -77,7 +77,7 @@ function App() {
   };
 
   // Handle save all edits to table
-  async function handleSave (newCards, newCats, newCbs) {
+  async function handleEdit (newCards, newCats, newCbs) {
     Promise.all([
       updateCard(newCards),
       udpateCategory(newCats),
@@ -98,7 +98,7 @@ function App() {
 
   return (
     <div>
-      <TableWrapper cards={cards} categories={categories} cbMap={cbMap} isEditing={isEditing} handleSave={handleSave} />
+      <TableWrapper cards={cards} categories={categories} cbMap={cbMap} isEditing={isEditing} handleEdit={handleEdit} />
       {!isEditing &&
         <div> 
           <button onClick={() => {setModalType('addCategory'); toggleModal();}}>Add category</button>
@@ -107,8 +107,7 @@ function App() {
           <button onClick={() => {setModalType('deleteCard'); toggleModal();}}>Delete card</button>
           <button onClick={() => {setModalType('deleteCat'); toggleModal();}}>Delete category</button>
         </div>
-      }
-        
+      } 
       {modalOpen && (
         <Modal onClose={() => setModalType(null)}>
           {modalContent()}

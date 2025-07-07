@@ -5,7 +5,7 @@ export const useCategories = () => {
     const [categories, setCategories] = useState([]);
 
     useEffect(() => {
-        const res = categoryService.getCategory()
+        categoryService.getCategory()
             .then(res => setCategories(res));
     }, []);
 
@@ -16,6 +16,7 @@ export const useCategories = () => {
 
         const res = await categoryService.addCategory(formatName);
         setCategories(prev => [...prev, res]);
+        return res;
     };
     const udpateCategory = (updatedCats) => {
         setCategories(prev => 

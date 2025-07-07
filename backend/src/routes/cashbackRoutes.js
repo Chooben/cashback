@@ -61,9 +61,9 @@ router.put('/', validateCashbackArray, (req, res) => {
 
             const exists = db.prepare(`
                 SELECT * FROM cashback 
-                WHERE cardId = ? and catId = ?
+                WHERE cardId = ? AND catId = ?
             `).get(cardId, catId);
-
+            console.log("does cb exist currently", exists)
             if (exists) {
                 const query = db.prepare(`
                     UPDATE cashback 

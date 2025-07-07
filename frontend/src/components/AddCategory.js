@@ -1,11 +1,12 @@
 import { useState } from "react"
 
-export const AddCategory = ({ addCat, categories, toggleModal }) => {
+export const AddCategory = ({ addCat, categories, addCashbacks, toggleModal }) => {
     const [category, setCategory] = useState('');
 
     const handleCat = async (e) => {
         e.preventDefault();
-        await addCat(category);
+        const res = await addCat(category);
+        addCashbacks(null, res.id, []);
         setCategory('');
         toggleModal();
     }

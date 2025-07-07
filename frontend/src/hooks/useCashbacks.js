@@ -28,25 +28,37 @@ export const useCashbacks = ({ cards, categories }) => {
         return map;
     }, [cards, categories, cashbacks]);
 
-    const addCashbacks = async (cardId, newCashbacks) => {
-        const formatCb = Object.entries(newCashbacks).map(([catId, percent]) => (
-            { 
-                cardId: parseInt(cardId), 
-                catId: parseInt(catId), 
-                percent: parseFloat(percent),
+    const addCashbacks = async (cardId, catId, newCashbacks) => {
+        const newCbs = [];
+        if (cardId) {
+            Object.entries(newCashbacks).map(([catId, percent]) => 
+                newCbs.push({ 
+                    cardId: parseInt(cardId), 
+                    catId: parseInt(catId), 
+                    percent: parseFloat(percent),
+                })
+            );
+            
+            
+        } else if (catId) {
+            if (cards.length > 0) {
+                cards.forEach(card => newCbs.push({ cardId: card.id, catId, percent: 0}));
             }
-        ));
-        const res = await cashbackService.createCashback(formatCb);
-        console.log("addcashbacks result", res)
+        }
+        const res = await cashbackService.createCashback(newCbs);
         setCashbacks(prev => [...prev, ...res]);
+        console.log("addcashbacks result", res)
+        
     };
     const updateCashbacks = (updatedCashbacks) => {
+        console.log("udpate cashbacks input", updatedCashbacks);
         setCashbacks(prev => 
-            prev.map(cb => {
-            const key = `${cb.cardId}_${cb.catId}`;
-            return updatedCashbacks[key] !== undefined ?
-                {...cb, percent: updatedCashbacks[key]} : cb
-            }
+            prev.map(cb => 
+                updatedCashbacks[`${cb.cardId}_${cb.catId}`] ? 
+                    {
+                        ...cb, 
+                        percent: parseFloat(updatedCashbacks[`${cb.cardId}_${cb.catId}`])
+                    } : cb
         ));
 
         const formatCbs = Object.entries(updatedCashbacks).map(

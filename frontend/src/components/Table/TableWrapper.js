@@ -1,12 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 
-export const TableWrapper = ({ cards, categories, cbMap, isEditing, handleSave }) => {
+export const TableWrapper = ({ cards, categories, cbMap, isEditing, handleEdit }) => {
     const [editingState, setEditingState] = useState();
-
     const [editCards, setEditCards] = useState([]);
     const [editCats, setEditCats] = useState([]);
     const [editCbs, setEditCbs] = useState({});
-
     const updatedCards = useRef({});
     const updatedCats = useRef({});
     const updatedCbs = useRef({});
@@ -43,7 +41,10 @@ export const TableWrapper = ({ cards, categories, cbMap, isEditing, handleSave }
                 ...prev, 
                 [cb.key]: parseFloat(value) || 0
             }));
+            console.log("cb editing value", value);
+            console.log("current cb key", cb.key)
             updatedCbs.current[cb.key] = parseFloat(value) || 0;
+            console.log("updatedCbs being returned", updatedCbs);
         } else {
             console.log("Invalid handle change type");
         }
@@ -51,8 +52,7 @@ export const TableWrapper = ({ cards, categories, cbMap, isEditing, handleSave }
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        handleSave(updatedCards.current, updatedCats.current, updatedCbs.current);
-        console.log(updatedCards.current)
+        handleEdit(updatedCards.current, updatedCats.current, updatedCbs.current);
         updatedCards.current = {};
         updatedCats.current = {};
         updatedCbs.current = {};
@@ -112,7 +112,7 @@ export const TableWrapper = ({ cards, categories, cbMap, isEditing, handleSave }
             {isEditing && (
                 <div>
                     <button onClick={handleSubmit}>Save</button>
-                    <button onClick={() => handleSave({}, {}, {})}>Cancel</button>
+                    <button onClick={() => handleEdit({}, {}, {})}>Cancel</button>
                 </div>
             )}
         </div>

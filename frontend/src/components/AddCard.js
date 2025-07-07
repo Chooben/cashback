@@ -19,8 +19,8 @@ export const AddCard = ({ addCard, categories, addCashbacks, toggleModal }) => {
 
     const handlesubmit = async (e) => {
         e.preventDefault();
-        const newCardId = await addCard(cardName);
-        await addCashbacks(newCardId, cbValues);
+        const res = await addCard(cardName);
+        await addCashbacks(res.id, null, cbValues);
         setCardName('');
         setValues({});
         toggleModal();
